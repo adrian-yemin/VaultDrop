@@ -2,6 +2,7 @@
 backend/target/
 backend/.idea/
 backend/*.iml
+backend/application.properties
 
 # Frontend (Node / Vite)
 frontend/node_modules/
@@ -12,3 +13,4 @@ frontend/.idea/
 .DS_Store
 *.log
 .env
+
