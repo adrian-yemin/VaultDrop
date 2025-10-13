@@ -4,17 +4,9 @@ import lombok.Data;
 
 @Data
 public class UploadResponse {
-    private String link;
-    private String error;
+    private String message;
 
-    public UploadResponse() {}
-
-    public UploadResponse(String link) {
-        this.link = link;
-    }
-
-    public UploadResponse(String link, String error) {
-        this.link = link;
-        this.error = error;
+    public UploadResponse(String message) {
+        this.message = message;
     }
 }
