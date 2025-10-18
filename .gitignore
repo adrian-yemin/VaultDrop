@@ -2,13 +2,20 @@
 backend/target/
 backend/.idea/
 backend/*.iml
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/src/main/resources/application.properties
+backend/uploads/
 
 # Frontend (Node / Vite)
 frontend/node_modules/
 frontend/dist/
+frontend/build/
 frontend/.idea/
+frontend/.env
 
-# Common
+# Common / OS
 .DS_Store
 *.log
-.env
+
