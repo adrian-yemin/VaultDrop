@@ -1,0 +1,38 @@
+# =======================
+# Backend (Java / Maven)
+# =======================
+backend/target/
+backend/.idea/
+backend/*.iml
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/src/main/resources/application.properties
+backend/uploads/
+
+# =======================
+# Frontend (Node / Vite)
+# =======================
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/build/
+frontend/.idea/
+frontend/.env
+
+# =======================
+# IDE / Editor
+# =======================
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# =======================
+# OS / Misc
+# =======================
+.DS_Store
+*.log
