@@ -1,8 +1,11 @@
 package com.example.backend.service;
 
-import com.example.backend.model.File;
-import com.example.backend.model.User;
+import com.example.backend.model.response.ApiResponse;
+import com.example.backend.model.dto.FileDTO;
+import com.example.backend.model.entity.File;
+import com.example.backend.model.entity.User;
 import com.example.backend.repository.FileRepository;
+import com.example.backend.service.storage.LocalStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,56 +14,44 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class FileService {
     private final FileRepository fileRepository;
-
-    private final Path storageDir = Paths.get("uploads");
-
-    public File storeFile(MultipartFile fileUpload, User user) throws IOException {
-        ensureStorageDirExists();
-        Path filePath = storeMultipartFile(fileUpload);
-        File file = new File(fileUpload, filePath);
-        file.setUser(user);
-        fileRepository.save(file);
-        return file;
-    }
+    private final LocalStorageService localStorageService;
 
     public File storeFile(MultipartFile fileUpload) throws IOException {
-        ensureStorageDirExists();
-        Path filePath = storeMultipartFile(fileUpload);
+        UUID uuid = UUID.randomUUID();
+        Path filePath = localStorageService.save(uuid, fileUpload.getInputStream());
         File file = new File(fileUpload, filePath);
+        file.setExternalId(uuid);
         fileRepository.save(file);
         return file;
     }
 
-    private void ensureStorageDirExists() throws IOException {
-        if (Files.notExists(storageDir)) {
-            Files.createDirectories(storageDir);
-        }
+    public void storeFile(MultipartFile fileUpload, User user) throws IOException {
+        UUID uuid = UUID.randomUUID();
+        Path filePath = localStorageService.save(uuid, fileUpload.getInputStream());
+        File file = new File(fileUpload, filePath, user);
+        file.setExternalId(uuid);
+        fileRepository.save(file);
     }
 
-    private Path storeMultipartFile(MultipartFile file) throws IOException {
-        Path filePath = storageDir.resolve(Objects.requireNonNull(file.getOriginalFilename()));
-        Files.copy(file.getInputStream(), filePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-        return filePath;
-    }
-
-    public String deleteFile(UUID id) {
+    public ApiResponse<Void> deleteFile(UUID id) throws IOException {
         File file = fileRepository.findByExternalId(id);
         if (file == null) {
-            return "File not found";
+            return new ApiResponse<>(false, "File not found", null);
         }
-        try {
-            Files.deleteIfExists(Paths.get(file.getStoragePath()));
-            fileRepository.delete(file);
-            return "File deleted successfully";
-        } catch (IOException e) {
-            return "Error deleting file: " + e.getMessage();
-        }
+        fileRepository.delete(file);
+        localStorageService.delete(file.getExternalId());
+        return new ApiResponse<>(true, "File deleted successfully", null);
+    }
+
+    public List<FileDTO> getFilesByUser(User user) {
+        List<File> fileEntities = fileRepository.findAllByUser(user);
+        return fileEntities.stream().map(FileDTO::new).toList();
     }
 }

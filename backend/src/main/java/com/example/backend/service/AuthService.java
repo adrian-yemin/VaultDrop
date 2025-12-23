@@ -1,12 +1,10 @@
 package com.example.backend.service;
 
-import com.example.backend.model.AuthRequest;
-import com.example.backend.model.AuthResponse;
-import com.example.backend.model.RegisterRequest;
-import com.example.backend.model.User;
+import com.example.backend.exception.UsernameAlreadyExistsException;
+import com.example.backend.model.entity.User;
+import com.example.backend.model.request.AuthRequest;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.config.security.JwtUtil;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,25 +16,30 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    public AuthService(UserRepository userRepository, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
     }
 
-    public void registerUser(RegisterRequest request) {
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+    public void registerUser(AuthRequest request) {
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new UsernameAlreadyExistsException("Username already exists");
+        }
+
+        User user = new User(
+                request.getUsername(),
+                passwordEncoder.encode(request.getPassword())
+        );
         userRepository.save(user);
     }
 
-    public ResponseEntity<AuthResponse> loginUser(AuthRequest request) {
+    public String loginUser(AuthRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
@@ -45,8 +48,7 @@ public class AuthService {
         );
 
         if(authentication.isAuthenticated()) {
-            String token = jwtUtil.generateToken(request.getUsername());
-            return ResponseEntity.ok(new AuthResponse(token));
+            return jwtUtil.generateToken(request.getUsername());
         }
         else {
             throw new BadCredentialsException("Invalid credentials");

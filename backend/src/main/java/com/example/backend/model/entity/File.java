@@ -1,4 +1,4 @@
-package com.example.backend.model;
+package com.example.backend.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.time.Instant;
 
 @Entity
+@Table(name = "files")
 @Data
 public class File {
     @Id
@@ -20,10 +21,10 @@ public class File {
     private UUID externalId = UUID.randomUUID();
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "file")
+    @OneToMany(mappedBy = "file", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ShareLink> shareLinks;
 
     private String originalFilename;
@@ -39,7 +40,13 @@ public class File {
         this.storagePath = filePath.toString();
         this.mimeType = file.getContentType();
         this.size = file.getSize();
-        this.uploadedAt = Instant.now();
     }
 
+    public File(MultipartFile file, Path path, User user) {
+        this.originalFilename = file.getOriginalFilename();
+        this.storagePath = path.toString();
+        this.mimeType = file.getContentType();
+        this.size = file.getSize();
+        this.user = user;
+    }
 }

@@ -1,11 +1,12 @@
 package com.example.backend.controller;
 
-import com.example.backend.model.AuthRequest;
-import com.example.backend.model.RegisterRequest;
+import com.example.backend.model.request.AuthRequest;
+import com.example.backend.model.response.ApiResponse;
+import com.example.backend.model.dto.UserDTO;
+import com.example.backend.model.entity.User;
 import com.example.backend.service.AuthService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,23 +19,26 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
-        try {
-            return authService.loginUser(request);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-        }
+    public ResponseEntity<ApiResponse<String>> login(@RequestBody AuthRequest request) {
+        String token = authService.loginUser(request);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Login successful", token));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<ApiResponse<Void>> register(@RequestBody AuthRequest request) {
         authService.registerUser(request);
-        return ResponseEntity.ok("User registered successfully");
+        return ResponseEntity.ok(new ApiResponse<>(true, "User registered successfully", null));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> me(Authentication authentication) {
-        return ResponseEntity.ok("You are logged in as " + authentication.getName());
+    public ResponseEntity<ApiResponse<UserDTO>> me(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "User info retrieved successfully",
+                        new UserDTO(user)
+                )
+        );
     }
 
 }

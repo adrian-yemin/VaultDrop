@@ -1,20 +1,21 @@
 package com.example.backend.controller;
 
-import com.example.backend.model.*;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.model.request.AnonymousUploadRequest;
+import com.example.backend.model.dto.*;
+import com.example.backend.model.entity.File;
+import com.example.backend.model.entity.User;
+import com.example.backend.model.request.ShareLinkRequest;
+import com.example.backend.model.response.ApiResponse;
 import com.example.backend.service.FileService;
 import com.example.backend.service.LinkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -23,94 +24,64 @@ public class FileController {
     private final FileService fileService;
     private final LinkService linkService;
 
-    private final UserRepository userRepository;
-
-    private static final Logger log = LoggerFactory.getLogger(FileController.class);
-
     @Autowired
-    public FileController(LinkService linkService, FileService fileService, UserRepository userRepository) {
+    public FileController(LinkService linkService, FileService fileService) {
         this.fileService = fileService;
         this.linkService = linkService;
-        this.userRepository = userRepository;
     }
 
     @PostMapping("/upload_anonymous")
-    public AnonymousUploadResponse uploadFileAnonymous(@ModelAttribute AnonymousUploadRequest uploadRequest) {
-        try {
-            File upload = fileService.storeFile(uploadRequest.getFile());
-            String shareLink = linkService.createShareLink(new ShareLinkRequest(
-                    upload.getExternalId(),
-                    uploadRequest.isOneTimeUse(),
-                    uploadRequest.getMaxDownloads(),
-                    uploadRequest.getExpiresAt()
-            ));
-            return new AnonymousUploadResponse(shareLink);
-        }
-        catch (Exception e) {
-            return new AnonymousUploadResponse(e);
-        }
+    public ResponseEntity<ApiResponse<String>> uploadFileAnonymous(
+            @ModelAttribute AnonymousUploadRequest uploadRequest
+    ) throws IOException {
+        File upload = fileService.storeFile(uploadRequest.getFile());
+        String shareLink = linkService.createShareLink(new ShareLinkRequest(
+                upload.getExternalId(),
+                uploadRequest.isOneTimeUse(),
+                uploadRequest.getMaxDownloads(),
+                uploadRequest.getExpiresAt()
+        ));
+        return ResponseEntity.ok(new ApiResponse<>(true, "File uploaded successfully", shareLink));
     }
 
-    @PostMapping("/upload/auth")
-    public UploadResponse uploadFileAuth(@RequestParam("file") MultipartFile file) {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        log.info(">>> Current Authentication = {}", auth);
-
-        try {
-            // Extract username from authentication
-            String username = auth.getName();
-
-            // Load User entity from your repository
-            User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-
-            // Pass the user to fileService
-            fileService.storeFile(file, user);
-            return new UploadResponse("File uploaded successfully");
-        } catch (IOException e) {
-            log.error("Error uploading file", e);
-            return new UploadResponse("Error uploading file: " + e.getMessage());
-        } catch (Exception e) {
-            log.error("Unexpected error", e);
-            return new UploadResponse("Unexpected error: " + e.getMessage());
-        }
+    @PostMapping("/upload")
+    public ResponseEntity<ApiResponse<Void>> uploadFileAuth(
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal User user)
+    throws IOException {
+        fileService.storeFile(file, user);
+        return ResponseEntity.ok(new ApiResponse<>(true, "File uploaded successfully", null));
     }
 
     @GetMapping("/my/files")
-    public String listFiles() {
-        return "List of files";
+    public ResponseEntity<ApiResponse<List<FileDTO>>> listFiles(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new ApiResponse<>(true, "", fileService.getFilesByUser(user)));
     }
 
     @DeleteMapping("/my/files/{fileId}")
-    public String deleteFile(@PathVariable UUID fileId) {
-        return fileService.deleteFile(fileId);
+    public ResponseEntity<ApiResponse<Void>> deleteFile(@PathVariable UUID fileId) throws IOException {
+        return ResponseEntity.ok(fileService.deleteFile(fileId));
     }
 
     @PostMapping("/share")
-    public String generateShareLink(@RequestBody ShareLinkRequest shareLinkRequest) {
-        return linkService.createShareLink(shareLinkRequest);
+    public ResponseEntity<ApiResponse<String>> generateShareLink(@RequestBody ShareLinkRequest shareLinkRequest, @AuthenticationPrincipal User user) {
+        String shareLink = linkService.createShareLink(shareLinkRequest, user);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Share link created successfully", shareLink));
     }
 
     @GetMapping("/share/{token}")
-    public ResponseEntity<byte[]> downloadFile(@PathVariable UUID token) {
-        try {
-            return linkService.downloadFile(token);
-        } catch (IOException e) {
-            throw new RuntimeException("Error retrieving file: " + e.getMessage());
-        }
+    public ResponseEntity<byte[]> downloadFile(@PathVariable UUID token) throws IOException {
+        return linkService.downloadFile(token);
     }
 
     @DeleteMapping("/my/share/delete/{token}")
-    public String deleteShareLink(@PathVariable UUID token) {
-        try {
-            linkService.deleteShareLink(token);
-            return "Share link deleted successfully";
-        } catch (RuntimeException e) {
-            return "Error deleting share link: " + e.getMessage();
-        }
+    public ResponseEntity<ApiResponse<Void>> deleteShareLink(@PathVariable UUID token, @AuthenticationPrincipal User user) {
+        linkService.deleteShareLink(token, user);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Share link deleted successfully", null));
     }
 
     @GetMapping("/my/share/links")
-    public String listShareLinks() {
-        return "List of share links";
+    public ResponseEntity<ApiResponse<List<ShareLinkDTO>>> listShareLinks(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new ApiResponse<>(true, "", linkService.getUserShareLinks(user)));
     }
 }

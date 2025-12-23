@@ -1,8 +1,8 @@
-package com.example.backend.config;
+package com.example.backend.config.security;
 
-import com.example.backend.config.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -37,12 +37,13 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll() // allow register & login without token
-                        .requestMatchers("/api/upload_anonymous").permitAll() // allow anonymous uploads without token
-                        .anyRequest().authenticated() // everything else needs JWT
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/upload_anonymous").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/share/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // no HTTP sessions, JWT only
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

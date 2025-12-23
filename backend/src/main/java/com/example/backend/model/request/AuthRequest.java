@@ -1,11 +1,13 @@
-package com.example.backend.model;
+package com.example.backend.model.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
-public class RegisterRequest {
+@NoArgsConstructor
+public class AuthRequest {
     private String username;
     private String password;
 }
