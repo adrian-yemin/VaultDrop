@@ -8,6 +8,7 @@ import com.example.backend.model.request.ShareLinkRequest;
 import com.example.backend.model.response.ApiResponse;
 import com.example.backend.service.FileService;
 import com.example.backend.service.LinkService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,12 +33,12 @@ public class FileController {
 
     @PostMapping("/upload_anonymous")
     public ResponseEntity<ApiResponse<String>> uploadFileAnonymous(
-            @ModelAttribute AnonymousUploadRequest uploadRequest
+            @Valid @ModelAttribute AnonymousUploadRequest uploadRequest
     ) throws IOException {
         File upload = fileService.storeFile(uploadRequest.getFile());
         String shareLink = linkService.createShareLink(new ShareLinkRequest(
                 upload.getExternalId(),
-                uploadRequest.isOneTimeUse(),
+                uploadRequest.getOneTimeUse(),
                 uploadRequest.getMaxDownloads(),
                 uploadRequest.getExpiresAt()
         ));

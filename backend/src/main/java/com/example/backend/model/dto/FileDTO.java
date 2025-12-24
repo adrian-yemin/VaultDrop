@@ -2,11 +2,13 @@ package com.example.backend.model.dto;
 
 import com.example.backend.model.entity.File;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Data
+@NoArgsConstructor
 public class FileDTO {
     private UUID id;
     private String originalFilename;

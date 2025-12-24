@@ -2,11 +2,13 @@ package com.example.backend.model.dto;
 
 import com.example.backend.model.entity.ShareLink;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Data
+@NoArgsConstructor
 public class ShareLinkDTO {
     private UUID token;
     private UUID fileId;
