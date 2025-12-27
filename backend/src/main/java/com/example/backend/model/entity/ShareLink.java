@@ -47,6 +47,7 @@ public class ShareLink {
         this.oneTimeUse = oneTimeUse;
         this.downloadCount = 0;
         this.maxDownloads = maxDownloads;
+        this.user = user;
     }
 
     public void incrementDownloadCount() {
