@@ -87,7 +87,7 @@ public class LinkService {
     public String createShareLink(ShareLinkRequest shareLinkRequest) {
         ShareLink link = new ShareLink(
                 fileRepository.findByExternalId(shareLinkRequest.getFileId()),
-                Instant.parse(shareLinkRequest.getExpiresAt()),
+                shareLinkRequest.getExpiresAt() != null ? Instant.parse(shareLinkRequest.getExpiresAt()) : null,
                 shareLinkRequest.isOneTimeUse(),
                 shareLinkRequest.getMaxDownloads()
         );
@@ -98,7 +98,7 @@ public class LinkService {
     public String createShareLink(ShareLinkRequest shareLinkRequest, User user) {
         ShareLink link = new ShareLink(
                 fileRepository.findByExternalId(shareLinkRequest.getFileId()),
-                Instant.parse(shareLinkRequest.getExpiresAt()),
+                shareLinkRequest.getExpiresAt() != null ? Instant.parse(shareLinkRequest.getExpiresAt()) : null,
                 shareLinkRequest.isOneTimeUse(),
                 shareLinkRequest.getMaxDownloads(),
                 user
