@@ -41,11 +41,13 @@ public class LinkService {
 
         if (shareLink.getExpiresAt() != null &&
                 Instant.now().isAfter(shareLink.getExpiresAt())) {
+            cleanupShareLink(shareLink);
             throw new IOException("Link expired");
         }
 
         if (shareLink.getMaxDownloads() > 0 &&
                 shareLink.getDownloadCount() >= shareLink.getMaxDownloads()) {
+            cleanupShareLink(shareLink);
             throw new IOException("Download limit exceeded");
         }
 
@@ -64,8 +66,9 @@ public class LinkService {
         File file = shareLink.getFile();
 
         shareLinkRepository.delete(shareLink);
+        shareLinkRepository.flush();
 
-        if (file.getUser() == null) {
+        if (file.getUser() == null && file.getShareLinks().isEmpty()) {
             fileRepository.delete(file);
             localStorageService.delete(file.getExternalId());
         }
@@ -104,6 +107,7 @@ public class LinkService {
                 user
         );
         shareLinkRepository.save(link);
+        System.out.println(link.getUser().getUsername());
         return StringUtils.createShareLinkUrl(link.getExternalId());
     }
 

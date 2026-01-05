@@ -1,6 +1,7 @@
 package com.example.backend.model.dto;
 
 import com.example.backend.model.entity.ShareLink;
+import com.example.backend.utils.StringUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ShareLinkDTO {
     private UUID token;
+    private String url;
     private UUID fileId;
     private String fileName;
     private boolean oneTimeUse;
@@ -21,6 +23,7 @@ public class ShareLinkDTO {
 
     public ShareLinkDTO(ShareLink entity) {
         this.token = entity.getExternalId();
+        this.url = StringUtils.createShareLinkUrl(entity.getExternalId());
         this.fileId = entity.getFile().getExternalId();
         this.fileName = entity.getFile().getOriginalFilename();
         this.oneTimeUse = entity.isOneTimeUse();

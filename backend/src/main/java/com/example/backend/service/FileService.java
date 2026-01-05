@@ -36,6 +36,7 @@ public class FileService {
         File file = new File(fileUpload, filePath, user);
         file.setExternalId(uuid);
         fileRepository.save(file);
+        System.out.println(file.getUser().getUsername());
     }
 
     public ApiResponse<Void> deleteFile(UUID id) throws IOException {

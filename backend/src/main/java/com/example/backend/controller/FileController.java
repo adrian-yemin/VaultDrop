@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import com.example.backend.config.security.CustomUserDetails;
 import com.example.backend.model.request.AnonymousUploadRequest;
 import com.example.backend.model.dto.*;
 import com.example.backend.model.entity.File;
@@ -48,14 +49,17 @@ public class FileController {
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse<Void>> uploadFileAuth(
             @RequestParam("file") MultipartFile file,
-            @AuthenticationPrincipal User user)
+            @AuthenticationPrincipal CustomUserDetails userDetails)
     throws IOException {
+        User user = userDetails.user();
+        System.out.println(user.getUsername());
         fileService.storeFile(file, user);
         return ResponseEntity.ok(new ApiResponse<>(true, "File uploaded successfully", null));
     }
 
     @GetMapping("/my/files")
-    public ResponseEntity<ApiResponse<List<FileDTO>>> listFiles(@AuthenticationPrincipal User user) {
+    public ResponseEntity<ApiResponse<List<FileDTO>>> listFiles(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        User user = userDetails.user();
         return ResponseEntity.ok(new ApiResponse<>(true, "", fileService.getFilesByUser(user)));
     }
 
@@ -65,7 +69,8 @@ public class FileController {
     }
 
     @PostMapping("/share")
-    public ResponseEntity<ApiResponse<String>> generateShareLink(@RequestBody ShareLinkRequest shareLinkRequest, @AuthenticationPrincipal User user) {
+    public ResponseEntity<ApiResponse<String>> generateShareLink(@RequestBody ShareLinkRequest shareLinkRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        User user = userDetails.user();
         String shareLink = linkService.createShareLink(shareLinkRequest, user);
         return ResponseEntity.ok(new ApiResponse<>(true, "Share link created successfully", shareLink));
     }
@@ -76,13 +81,15 @@ public class FileController {
     }
 
     @DeleteMapping("/my/share/delete/{token}")
-    public ResponseEntity<ApiResponse<Void>> deleteShareLink(@PathVariable UUID token, @AuthenticationPrincipal User user) {
+    public ResponseEntity<ApiResponse<Void>> deleteShareLink(@PathVariable UUID token, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        User user = userDetails.user();
         linkService.deleteShareLink(token, user);
         return ResponseEntity.ok(new ApiResponse<>(true, "Share link deleted successfully", null));
     }
 
     @GetMapping("/my/share/links")
-    public ResponseEntity<ApiResponse<List<ShareLinkDTO>>> listShareLinks(@AuthenticationPrincipal User user) {
+    public ResponseEntity<ApiResponse<List<ShareLinkDTO>>> listShareLinks(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        User user = userDetails.user();
         return ResponseEntity.ok(new ApiResponse<>(true, "", linkService.getUserShareLinks(user)));
     }
 }
