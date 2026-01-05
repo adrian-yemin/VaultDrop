@@ -26,6 +26,7 @@ class CustomUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_success() {
+        // Arrange
         User user = new User();
         user.setUsername("testuser");
         user.setPasswordHash("hashedPassword");
@@ -40,7 +41,8 @@ class CustomUserDetailsServiceTest {
         assertEquals("hashedPassword", userDetails.getPassword());
         assertTrue(
                 userDetails.getAuthorities().stream()
-                        .anyMatch(a -> a.getAuthority().equals("ROLE_USER"))
+                        .anyMatch(a -> a.getAuthority().equals("ROLE_USER")),
+                "User should have ROLE_USER authority"
         );
 
         verify(userRepository, times(1)).findByUsername("testuser");
