@@ -1,4 +1,4 @@
-import TopNav from "../components/TopNav/TopNav";
+import PreLoginTopNav from "../components/TopNav/PreLoginTopNav.tsx";
 import AnonymousUploadSection from "../components/AnonymousUpload/AnonymousUploadSection";
 import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -17,7 +17,7 @@ export default function PreLoginHomePage() {
 
     return (
         <>
-            <TopNav />
+            <PreLoginTopNav />
             <AnonymousUploadSection />
         </>
     );

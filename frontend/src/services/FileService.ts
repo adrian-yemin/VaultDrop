@@ -1,4 +1,6 @@
 import { api } from "./ApiClient.ts";
+import type { FileDTO } from "../types/File";
+import type { ShareLinkDTO } from "../types/ShareLink";
 
 export type AnonymousUploadRequest = {
     file: File;
@@ -37,4 +39,35 @@ export async function uploadAnonymousFile(
     );
 
     return response.data;
+}
+
+export function getMyFiles() {
+    return api.get<{ data: FileDTO[] }>("/api/my/files");
+}
+
+export function deleteFile(fileId: string) {
+    return api.delete(`/api/my/files/${fileId}`);
+}
+
+export function uploadFileAuth(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post("/api/upload", formData);
+}
+
+export function getMyShareLinks() {
+    return api.get<{ data: ShareLinkDTO[] }>("/api/my/share/links");
+}
+
+export function createShareLink(payload: {
+    fileId: string;
+    oneTimeUse: boolean;
+    maxDownloads: number;
+    expiresAt?: string;
+}) {
+    return api.post("/api/share", payload);
+}
+
+export function deleteShareLink(token: string) {
+    return api.delete(`/api/my/share/delete/${token}`);
 }

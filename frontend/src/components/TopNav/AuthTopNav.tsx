@@ -1,15 +1,23 @@
 import "./TopNav.css";
 import { useNavigate } from "react-router-dom";
 
-export default function TopNav() {
+export default function AuthTopNav() {
     const navigate = useNavigate();
+
+    const handleBack = () => {
+        navigate("/");
+    };
 
     return (
         <nav className="topnav">
             <div className="topnav-logo">VaultDrop</div>
             <div className="topnav-actions">
-                <button onClick={() => navigate("/login")} className="link-button">Log in</button>
-                <button onClick={() => navigate("/register")} className="primary-button">Sign up</button>
+                <button
+                    onClick={handleBack}
+                    className="link-button"
+                >
+                    Back To Home
+                </button>
             </div>
         </nav>
     );

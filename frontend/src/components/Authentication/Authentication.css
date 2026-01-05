@@ -1,10 +1,10 @@
 .auth-card {
     max-width: 420px;
     margin: 100px auto;
-    background: #242424;
+    background: #1e1e1e;
     border-radius: 12px;
     padding: 2rem;
-    border: 1px solid #1e293b;
+    border: 1px solid #333;
 }
 
 .auth-card h1 {
@@ -30,4 +30,11 @@
 .auth-form button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.auth-error {
+    color: #ff4d4f;
+    margin-top: 8px;
+    font-size: 0.9rem;
+    text-align: center;
 }

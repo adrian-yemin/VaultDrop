@@ -55,7 +55,7 @@ export default function AnonymousUploadSection() {
                             setMaxDownloads(1)
                         }}
                     />
-                    One-time use link
+                    One-Time Use Link
                 </label>
 
                 <label className="input-group">
@@ -73,7 +73,6 @@ export default function AnonymousUploadSection() {
                     />
                 </label>
 
-
                 <label className="input-group">
                     Expires At (Optional)
                     <input
@@ -86,7 +85,6 @@ export default function AnonymousUploadSection() {
                     />
                 </label>
             </div>
-
 
             <FileUploadBox
                 onFileChange={(file) => {

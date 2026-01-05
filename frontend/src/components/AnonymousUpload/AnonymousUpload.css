@@ -52,6 +52,7 @@ body {
     flex-direction: column;
     font-size: 0.95rem;
     color: #d1d5db;
+    padding-bottom: 10px;
 }
 
 .input-group span {
@@ -83,6 +84,7 @@ body {
     gap: 0.5rem;
     font-size: 0.95rem;
     color: #d1d5db;
+    padding-bottom: 0.5rem;
 }
 
 .share-link-card {
