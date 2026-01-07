@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AuthCard from "../components/Authentication/AuthCard";
 import { register as registerApi } from "../services/AuthService";
 import AuthTopNav from "../components/TopNav/AuthTopNav.tsx";
+import axios from "axios";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -13,8 +14,12 @@ export default function RegisterPage() {
         try {
             await registerApi(email, password);
             navigate("/login");
-        } catch (err: any) {
-            setError(err.response?.data?.message || "Username already exists");
+        } catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message ?? "Username already exists");
+            } else {
+                setError("Username already exists");
+            }
         }
     };
 

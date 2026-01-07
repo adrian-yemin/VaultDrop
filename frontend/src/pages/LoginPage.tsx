@@ -4,6 +4,7 @@ import AuthCard from "../components/Authentication/AuthCard";
 import { login as loginApi } from "../services/AuthService";
 import { useAuth } from "../auth/AuthContext";
 import AuthTopNav from "../components/TopNav/AuthTopNav.tsx";
+import axios from "axios";
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -16,8 +17,12 @@ export default function LoginPage() {
             const res = await loginApi(email, password);
             login(res.data.data);
             navigate("/dashboard");
-        } catch (err: any) {
-            setError(err.response?.data?.message || "Invalid credentials");
+        } catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message ?? "Invalid credentials");
+            } else {
+                setError("Invalid credentials");
+            }
         }
     };
 
