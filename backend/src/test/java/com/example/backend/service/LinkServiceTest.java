@@ -72,9 +72,11 @@ public class LinkServiceTest {
     @Test
     void downloadFile_expiredLink_throwsException() {
         UUID token = UUID.randomUUID();
+        File file = mock(File.class);
 
         ShareLink link = mock(ShareLink.class);
         when(link.getExpiresAt()).thenReturn(Instant.now().minusSeconds(60));
+        when(link.getFile()).thenReturn(file);
 
         when(shareLinkRepository.findByExternalId(token))
                 .thenReturn(Optional.of(link));
@@ -86,11 +88,13 @@ public class LinkServiceTest {
     @Test
     void downloadFile_maxDownloadsExceeded_throwsException() {
         UUID token = UUID.randomUUID();
+        File file = mock(File.class);
 
         ShareLink link = mock(ShareLink.class);
         when(link.getExpiresAt()).thenReturn(null);
         when(link.getMaxDownloads()).thenReturn(1);
         when(link.getDownloadCount()).thenReturn(1);
+        when(link.getFile()).thenReturn(file);
 
         when(shareLinkRepository.findByExternalId(token))
                 .thenReturn(Optional.of(link));
@@ -189,6 +193,7 @@ public class LinkServiceTest {
 
         ShareLink link = mock(ShareLink.class);
         when(link.getFile()).thenReturn(file);
+        when(link.getExternalId()).thenReturn(UUID.randomUUID());
         when(shareLinkRepository.findAllByUser(user))
                 .thenReturn(List.of(link));
 

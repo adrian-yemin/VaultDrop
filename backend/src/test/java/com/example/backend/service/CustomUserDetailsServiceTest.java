@@ -26,7 +26,6 @@ class CustomUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_success() {
-        // Arrange
         User user = new User();
         user.setUsername("testuser");
         user.setPasswordHash("hashedPassword");
