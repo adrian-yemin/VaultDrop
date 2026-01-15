@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-    baseURL: "http://localhost:8080",
+    baseURL: "http://vaultdrop-load-balancer-549238236.us-east-1.elb.amazonaws.com",
 });
 
 api.interceptors.request.use((config) => {

@@ -7,7 +7,7 @@ type Props = {
 };
 
 export default function ShareLinkCard({ link, onDelete }: Props) {
-    const fullUrl = `http://localhost:8080/api/share/${link.token}`;
+    const fullUrl = `http://vaultdrop-load-balancer-549238236.us-east-1.elb.amazonaws.com/api/share/${link.token}`;
 
     const handleCopy = () => {
         navigator.clipboard.writeText(fullUrl);
