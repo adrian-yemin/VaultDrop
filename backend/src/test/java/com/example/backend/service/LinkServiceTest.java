@@ -7,7 +7,7 @@ import com.example.backend.model.entity.User;
 import com.example.backend.model.request.ShareLinkRequest;
 import com.example.backend.repository.FileRepository;
 import com.example.backend.repository.ShareLinkRepository;
-import com.example.backend.service.storage.LocalStorageService;
+import com.example.backend.service.storage.S3StorageService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,7 +34,7 @@ public class LinkServiceTest {
     private ShareLinkRepository shareLinkRepository;
 
     @Mock
-    private LocalStorageService localStorageService;
+    private S3StorageService s3StorageService;
 
     @InjectMocks
     private LinkService linkService;
@@ -60,13 +60,13 @@ public class LinkServiceTest {
                 .thenReturn(Optional.of(link));
 
         byte[] data = "hello".getBytes();
-        when(localStorageService.read(fileId)).thenReturn(data);
+        when(s3StorageService.read(fileId)).thenReturn(data);
 
         ResponseEntity<byte[]> response = linkService.downloadFile(token);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertArrayEquals(data, response.getBody());
-        verify(localStorageService).read(fileId);
+        verify(s3StorageService).read(fileId);
     }
 
     @Test
@@ -124,13 +124,13 @@ public class LinkServiceTest {
         when(shareLinkRepository.findByExternalId(token))
                 .thenReturn(Optional.of(link));
 
-        when(localStorageService.read(fileId)).thenReturn(new byte[]{1});
+        when(s3StorageService.read(fileId)).thenReturn(new byte[]{1});
 
         linkService.downloadFile(token);
 
         verify(shareLinkRepository).delete(link);
         verify(fileRepository).delete(file);
-        verify(localStorageService).delete(fileId);
+        verify(s3StorageService).delete(fileId);
     }
 
     @Test

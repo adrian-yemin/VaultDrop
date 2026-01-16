@@ -31,6 +31,11 @@ public class FileController {
         this.linkService = linkService;
     }
 
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("ok");
+    }
+
     @PostMapping("/upload_anonymous")
     public ResponseEntity<ApiResponse<String>> uploadFileAnonymous(
             @Valid @ModelAttribute AnonymousUploadRequest uploadRequest

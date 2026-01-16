@@ -5,7 +5,7 @@ import com.example.backend.model.dto.FileDTO;
 import com.example.backend.model.entity.File;
 import com.example.backend.model.entity.User;
 import com.example.backend.repository.FileRepository;
-import com.example.backend.service.storage.LocalStorageService;
+import com.example.backend.service.storage.S3StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,11 +19,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FileService {
     private final FileRepository fileRepository;
-    private final LocalStorageService localStorageService;
+    private final S3StorageService s3StorageService;
 
     public File storeFile(MultipartFile fileUpload) throws IOException {
         UUID uuid = UUID.randomUUID();
-        Path filePath = localStorageService.save(uuid, fileUpload.getInputStream());
+        Path filePath = s3StorageService.save(uuid, fileUpload.getInputStream());
         File file = new File(fileUpload, filePath);
         file.setExternalId(uuid);
         fileRepository.save(file);
@@ -32,7 +32,7 @@ public class FileService {
 
     public void storeFile(MultipartFile fileUpload, User user) throws IOException {
         UUID uuid = UUID.randomUUID();
-        Path filePath = localStorageService.save(uuid, fileUpload.getInputStream());
+        Path filePath = s3StorageService.save(uuid, fileUpload.getInputStream());
         File file = new File(fileUpload, filePath, user);
         file.setExternalId(uuid);
         fileRepository.save(file);
@@ -45,7 +45,7 @@ public class FileService {
             return new ApiResponse<>(false, "File not found", null);
         }
         fileRepository.delete(file);
-        localStorageService.delete(file.getExternalId());
+        s3StorageService.delete(file.getExternalId());
         return new ApiResponse<>(true, "File deleted successfully", null);
     }
 

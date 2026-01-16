@@ -7,7 +7,7 @@ import com.example.backend.model.entity.ShareLink;
 import com.example.backend.model.entity.User;
 import com.example.backend.repository.FileRepository;
 import com.example.backend.repository.ShareLinkRepository;
-import com.example.backend.service.storage.LocalStorageService;
+import com.example.backend.service.storage.S3StorageService;
 import com.example.backend.utils.StringUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +24,13 @@ import java.util.UUID;
 public class LinkService {
     private final FileRepository fileRepository;
     private final ShareLinkRepository shareLinkRepository;
-    private final LocalStorageService localStorageService;
+    private final S3StorageService s3StorageService;
 
     @Transactional
     public ResponseEntity<byte[]> downloadFile(UUID externalId) throws IOException {
         ShareLink shareLink = getValidShareLink(externalId);
         File file = shareLink.getFile();
-        byte[] data = localStorageService.read(file.getExternalId());
+        byte[] data = s3StorageService.read(file.getExternalId());
         recordDownload(shareLink);
         return buildDownloadResponse(file, data);
     }
@@ -70,7 +70,7 @@ public class LinkService {
 
         if (file.getUser() == null && file.getShareLinks().isEmpty()) {
             fileRepository.delete(file);
-            localStorageService.delete(file.getExternalId());
+            s3StorageService.delete(file.getExternalId());
         }
     }
 

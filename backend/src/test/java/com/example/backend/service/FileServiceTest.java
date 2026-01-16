@@ -5,7 +5,7 @@ import com.example.backend.model.entity.File;
 import com.example.backend.model.entity.User;
 import com.example.backend.model.response.ApiResponse;
 import com.example.backend.repository.FileRepository;
-import com.example.backend.service.storage.LocalStorageService;
+import com.example.backend.service.storage.S3StorageService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,7 +31,7 @@ public class FileServiceTest {
     private FileRepository fileRepository;
 
     @Mock
-    private LocalStorageService localStorageService;
+    private S3StorageService s3StorageService;
 
     @InjectMocks
     private FileService fileService;
@@ -43,7 +43,7 @@ public class FileServiceTest {
 
         Path fakePath = Paths.get("uploads/fake");
 
-        when(localStorageService.save(any(UUID.class), any()))
+        when(s3StorageService.save(any(UUID.class), any()))
                 .thenReturn(fakePath);
 
         File result = fileService.storeFile(multipartFile);
@@ -51,7 +51,7 @@ public class FileServiceTest {
         assertNotNull(result);
         assertNotNull(result.getExternalId());
 
-        verify(localStorageService).save(any(UUID.class), any());
+        verify(s3StorageService).save(any(UUID.class), any());
         verify(fileRepository).save(any(File.class));
     }
 
@@ -65,12 +65,12 @@ public class FileServiceTest {
 
         Path fakePath = Paths.get("uploads/fake");
 
-        when(localStorageService.save(any(UUID.class), any()))
+        when(s3StorageService.save(any(UUID.class), any()))
                 .thenReturn(fakePath);
 
         fileService.storeFile(multipartFile, user);
 
-        verify(localStorageService).save(any(UUID.class), any());
+        verify(s3StorageService).save(any(UUID.class), any());
         verify(fileRepository).save(argThat(file ->
                 file.getUser() != null && file.getUser().equals(user)
         ));
@@ -91,7 +91,7 @@ public class FileServiceTest {
         assertTrue(response.isSuccess());
 
         verify(fileRepository).delete(file);
-        verify(localStorageService).delete(id);
+        verify(s3StorageService).delete(id);
     }
 
     @Test
@@ -107,7 +107,7 @@ public class FileServiceTest {
         assertEquals("File not found", response.getMessage());
 
         verify(fileRepository, never()).delete(any());
-        verify(localStorageService, never()).delete(any());
+        verify(s3StorageService, never()).delete(any());
     }
 
     @Test
